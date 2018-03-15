@@ -26,6 +26,10 @@ class GitLabRegistry:
         self._total_size = None  # type: Optional[int]
         self._total_disk_size = None  # type: Optional[int]
 
+    def update(self) -> None:
+        self.clear()
+        self._image_layers, self._layer_sizes = self._get_image_layers_and_layer_sizes()
+
     def _get_image_layers_and_layer_sizes(self) -> Tuple[Dict[str, Dict[str, List[str]]], Dict[str, int]]:
         image_layers = {}  # type: Dict[str, Dict[str, List[str]]]
         layer_sizes = {}  # type: Dict[str, int]
