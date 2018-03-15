@@ -8,7 +8,7 @@ import re
 import subprocess
 import sys
 from typing import cast, Any, Callable
-from .registry.high_level_api import GitLabRegistry
+from .registry import GitLabRegistry
 from ._version import __version__, __version_info__  # noqa: F401 # pylint: disable=unused-import
 
 __author__ = 'Ingo Heimbach'
