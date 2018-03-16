@@ -176,19 +176,25 @@ def query_gitlab_registry(
 
     if sorting_order == 'size':
         def image_sort_key_func(image: str) -> Any:
-            return gitlab_registry.image_sizes[image]
+            image_size = gitlab_registry.image_sizes[image]
+            return image_size if image_size is not None else -1
 
         def tag_sort_key_func_for_image(image: str) -> Callable[[str], Any]:
+            tag_sizes = gitlab_registry.tag_sizes[image]
+
             def tag_sort_key_func(tag: str) -> Any:
-                return gitlab_registry.tag_sizes[image][tag]
+                return tag_sizes[tag] if tag_sizes is not None else -1
             return tag_sort_key_func
     elif sorting_order == 'disksize':
         def image_sort_key_func(image: str) -> Any:
-            return gitlab_registry.image_disk_sizes[image]
+            image_disk_size = gitlab_registry.image_disk_sizes[image]
+            return image_disk_size if image_disk_size is not None else -1
 
         def tag_sort_key_func_for_image(image: str) -> Callable[[str], Any]:
+            tag_disk_sizes = gitlab_registry.tag_disk_sizes[image]
+
             def tag_sort_key_func(tag: str) -> Any:
-                return gitlab_registry.tag_disk_sizes[image][tag]
+                return tag_disk_sizes[tag] if tag_disk_sizes is not None else -1
             return tag_sort_key_func
     else:
         def image_sort_key_func(image: str) -> Any:
@@ -201,22 +207,37 @@ def query_gitlab_registry(
 
     sorted_images = sorted(gitlab_registry.image_tags.keys(), key=image_sort_key_func)
     for image in sorted_images:
-        print(
-            ('{}{:>' + str(label_column_width) + '}{}:     image size: {}{:>9}{}, image disk size: {}{:>9}{}').format(
-                TerminalColorCodes.CYAN, image, TerminalColorCodes.RESET, TerminalColorCodes.YELLOW,
-                human_size(gitlab_registry.image_sizes[image]), TerminalColorCodes.RESET, TerminalColorCodes.YELLOW,
-                human_size(gitlab_registry.image_disk_sizes[image]), TerminalColorCodes.RESET
-            )
-        )
-        sorted_tags = sorted(gitlab_registry.image_tags[image], key=tag_sort_key_func_for_image(image))
-        for tag in sorted_tags:
+        image_tags = gitlab_registry.image_tags[image]
+        image_size = gitlab_registry.image_sizes[image]
+        image_disk_size = gitlab_registry.image_disk_sizes[image]
+        tag_sizes = gitlab_registry.tag_sizes[image]
+        tag_disk_sizes = gitlab_registry.tag_disk_sizes[image]
+        if (
+            image_tags is not None and image_size is not None and image_disk_size is not None and
+            tag_sizes is not None and tag_disk_sizes is not None
+        ):
             print(
-                ('{}{:>' + str(label_column_width + 4) +
-                 '}{}:   tag size: {}{:>9}{},   tag disk size: {}{:>9}{}').format(
-                     TerminalColorCodes.BLUE, tag, TerminalColorCodes.RESET, TerminalColorCodes.GREEN,
-                     human_size(gitlab_registry.tag_sizes[image][tag]),
-                     TerminalColorCodes.RESET, TerminalColorCodes.GREEN,
-                     human_size(gitlab_registry.tag_disk_sizes[image][tag]), TerminalColorCodes.RESET
+                ('{}{:>' + str(label_column_width) +
+                 '}{}:     image size: {}{:>9}{}, image disk size: {}{:>9}{}').format(
+                     TerminalColorCodes.CYAN, image, TerminalColorCodes.RESET, TerminalColorCodes.YELLOW,
+                     human_size(image_size), TerminalColorCodes.RESET, TerminalColorCodes.YELLOW,
+                     human_size(image_disk_size), TerminalColorCodes.RESET
+                )
+            )
+            sorted_tags = sorted(image_tags, key=tag_sort_key_func_for_image(image))
+            for tag in sorted_tags:
+                print(
+                    ('{}{:>' + str(label_column_width + 4) +
+                     '}{}:   tag size: {}{:>9}{},   tag disk size: {}{:>9}{}').format(
+                         TerminalColorCodes.BLUE, tag, TerminalColorCodes.RESET, TerminalColorCodes.GREEN,
+                         human_size(tag_sizes[tag]), TerminalColorCodes.RESET, TerminalColorCodes.GREEN,
+                         human_size(tag_disk_sizes[tag]), TerminalColorCodes.RESET
+                    )
+                )
+        else:
+            print(
+                ('{}{:>' + str(label_column_width) + '}{}:     no further information available').format(
+                    TerminalColorCodes.CYAN, image, TerminalColorCodes.RESET
                 )
             )
         print()
