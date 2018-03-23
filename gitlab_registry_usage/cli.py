@@ -8,7 +8,7 @@ import re
 import subprocess
 import sys
 from typing import cast, Any, Callable
-from .registry import GitLabRegistry
+from .registry import GitLabRegistry, AuthTokenError
 from ._version import __version__, __version_info__  # noqa: F401 # pylint: disable=unused-import
 
 __author__ = 'Ingo Heimbach'
@@ -117,7 +117,6 @@ def get_argumentparser() -> argparse.ArgumentParser:
         '--user',
         action='store',
         dest='username',
-        type=cast(Callable[[str], str], os.path.abspath),
         default=DEFAULT_USER,
         help='user account for querying the GitLab API (default: %(default)s)'
     )
@@ -254,9 +253,17 @@ def main() -> None:
     if args.print_version:
         print('{}, version {}'.format(os.path.basename(sys.argv[0]), __version__))
     else:
-        query_gitlab_registry(
-            args.gitlab_server, args.registry_server, args.username, args.password, args.sorting_order
-        )
+        try:
+            query_gitlab_registry(
+                args.gitlab_server, args.registry_server, args.username, args.password, args.sorting_order
+            )
+        except AuthTokenError:
+            print(
+                '{}Failed{} to get an auth token. Is the username/password correct?'.format(
+                    TerminalColorCodes.RED, TerminalColorCodes.RESET
+                ),
+                file=sys.stderr
+            )
     sys.exit(0)
 
 
