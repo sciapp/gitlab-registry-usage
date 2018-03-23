@@ -117,7 +117,6 @@ def get_argumentparser() -> argparse.ArgumentParser:
         '--user',
         action='store',
         dest='username',
-        type=cast(Callable[[str], str], os.path.abspath),
         default=DEFAULT_USER,
         help='user account for querying the GitLab API (default: %(default)s)'
     )
