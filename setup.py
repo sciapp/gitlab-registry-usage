@@ -7,9 +7,14 @@ from __future__ import unicode_literals
 
 import codecs
 import os
+import runpy
 import subprocess
 from setuptools import setup, find_packages
-from gitlab_registry_usage._version import __version__
+
+
+def get_version_from_pyfile(version_file='gitlab_registry_usage/_version.py'):
+    file_globals = runpy.run_path(version_file)
+    return file_globals['__version__']
 
 
 def get_install_requires_from_requirements(requirements_filename='requirements.txt'):
@@ -41,12 +46,13 @@ def get_long_description_from_readme(readme_filename='README.md'):
     return long_description
 
 
+version = get_version_from_pyfile()
 long_description = get_long_description_from_readme()
 install_requires = get_install_requires_from_requirements()
 
 setup(
     name='gitlab-registry-usage',
-    version=__version__,
+    version=version,
     packages=find_packages(),
     install_requires=install_requires,
     entry_points={
