@@ -78,7 +78,7 @@ def get_argumentparser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter,
         description='''
-%(prog)s is a utility for querying the memory usage of images in a GitLab registry.
+%(prog)s is a utility for querying the memory usage of repositories in a GitLab registry.
 '''
     )
     parser.add_argument(
@@ -169,61 +169,61 @@ def query_gitlab_registry(
     registry_base_url = 'https://{}/'.format(registry_server)
     gitlab_registry = GitLabRegistry(gitlab_base_url, registry_base_url, username, password)
     label_column_width = max(
-        [len(image) for image in gitlab_registry.registry_catalog] +
-        [len(tag) - 4 for tags in gitlab_registry.image_tags for tag in tags]
+        [len(repository) for repository in gitlab_registry.registry_catalog] +
+        [len(tag) - 4 for tags in gitlab_registry.repository_tags for tag in tags]
     )
 
     if sorting_order == 'size':
-        def image_sort_key_func(image: str) -> Any:
-            image_size = gitlab_registry.image_sizes[image]
-            return image_size if image_size is not None else -1
+        def repository_sort_key_func(repository: str) -> Any:
+            repository_size = gitlab_registry.repository_sizes[repository]
+            return repository_size if repository_size is not None else -1
 
-        def tag_sort_key_func_for_image(image: str) -> Callable[[str], Any]:
-            tag_sizes = gitlab_registry.tag_sizes[image]
+        def tag_sort_key_func_for_repository(repository: str) -> Callable[[str], Any]:
+            tag_sizes = gitlab_registry.tag_sizes[repository]
 
             def tag_sort_key_func(tag: str) -> Any:
                 return tag_sizes[tag] if tag_sizes is not None else -1
             return tag_sort_key_func
     elif sorting_order == 'disksize':
-        def image_sort_key_func(image: str) -> Any:
-            image_disk_size = gitlab_registry.image_disk_sizes[image]
-            return image_disk_size if image_disk_size is not None else -1
+        def repository_sort_key_func(repository: str) -> Any:
+            repository_disk_size = gitlab_registry.repository_disk_sizes[repository]
+            return repository_disk_size if repository_disk_size is not None else -1
 
-        def tag_sort_key_func_for_image(image: str) -> Callable[[str], Any]:
-            tag_disk_sizes = gitlab_registry.tag_disk_sizes[image]
+        def tag_sort_key_func_for_repository(repository: str) -> Callable[[str], Any]:
+            tag_disk_sizes = gitlab_registry.tag_disk_sizes[repository]
 
             def tag_sort_key_func(tag: str) -> Any:
                 return tag_disk_sizes[tag] if tag_disk_sizes is not None else -1
             return tag_sort_key_func
     else:
-        def image_sort_key_func(image: str) -> Any:
-            return image
+        def repository_sort_key_func(repository: str) -> Any:
+            return repository
 
-        def tag_sort_key_func_for_image(image: str) -> Callable[[str], Any]:  # pylint: disable=unused-argument
+        def tag_sort_key_func_for_repository(repository: str) -> Callable[[str], Any]:  # pylint:disable=unused-argument
             def tag_sort_key_func(tag: str) -> Any:
                 return tag
             return tag_sort_key_func
 
-    sorted_images = sorted(gitlab_registry.image_tags.keys(), key=image_sort_key_func)
-    for image in sorted_images:
-        image_tags = gitlab_registry.image_tags[image]
-        image_size = gitlab_registry.image_sizes[image]
-        image_disk_size = gitlab_registry.image_disk_sizes[image]
-        tag_sizes = gitlab_registry.tag_sizes[image]
-        tag_disk_sizes = gitlab_registry.tag_disk_sizes[image]
+    sorted_repositories = sorted(gitlab_registry.repository_tags.keys(), key=repository_sort_key_func)
+    for repository in sorted_repositories:
+        repository_tags = gitlab_registry.repository_tags[repository]
+        repository_size = gitlab_registry.repository_sizes[repository]
+        repository_disk_size = gitlab_registry.repository_disk_sizes[repository]
+        tag_sizes = gitlab_registry.tag_sizes[repository]
+        tag_disk_sizes = gitlab_registry.tag_disk_sizes[repository]
         if (
-            image_tags is not None and image_size is not None and image_disk_size is not None and
+            repository_tags is not None and repository_size is not None and repository_disk_size is not None and
             tag_sizes is not None and tag_disk_sizes is not None
         ):
             print(
                 ('{}{:>' + str(label_column_width) +
-                 '}{}:     image size: {}{:>9}{}, image disk size: {}{:>9}{}').format(
-                     TerminalColorCodes.CYAN, image, TerminalColorCodes.RESET, TerminalColorCodes.YELLOW,
-                     human_size(image_size), TerminalColorCodes.RESET, TerminalColorCodes.YELLOW,
-                     human_size(image_disk_size), TerminalColorCodes.RESET
+                 '}{}:     repository size: {}{:>9}{}, repository disk size: {}{:>9}{}').format(
+                     TerminalColorCodes.CYAN, repository, TerminalColorCodes.RESET, TerminalColorCodes.YELLOW,
+                     human_size(repository_size), TerminalColorCodes.RESET, TerminalColorCodes.YELLOW,
+                     human_size(repository_disk_size), TerminalColorCodes.RESET
                 )
             )
-            sorted_tags = sorted(image_tags, key=tag_sort_key_func_for_image(image))
+            sorted_tags = sorted(repository_tags, key=tag_sort_key_func_for_repository(repository))
             for tag in sorted_tags:
                 print(
                     ('{}{:>' + str(label_column_width + 4) +
@@ -236,7 +236,7 @@ def query_gitlab_registry(
         else:
             print(
                 ('{}{:>' + str(label_column_width) + '}{}:     no further information available').format(
-                    TerminalColorCodes.CYAN, image, TerminalColorCodes.RESET
+                    TerminalColorCodes.CYAN, repository, TerminalColorCodes.RESET
                 )
             )
         print()

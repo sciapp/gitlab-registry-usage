@@ -2,9 +2,9 @@
 
 ## Introduction
 
-*GitLab-Registry-Usage* is a package for querying the sizes of Docker images stored in a GitLab registry. The package
-has been created because it is not possible to monitor sizes of GitLab registry images with GitLab web monitoring tools
-(GitLab version <= 10.5.4).
+*GitLab-Registry-Usage* is a package for querying the sizes of Docker repositories stored in a GitLab registry. The
+package has been created because it is not possible to monitor sizes of GitLab registry repositories with GitLab web
+monitoring tools (GitLab version <= 10.5.4).
 
 ## Installation
 
@@ -26,7 +26,7 @@ usage: gitlab-registry-usage [-h] [-g GITLAB_SERVER] [-r REGISTRY_SERVER]
                              [-s {name,size,disksize}] [-c CREDENTIALS_FILE]
                              [-u USERNAME] [-V]
 
-gitlab-registry-usage is a utility for querying the memory usage of images in a GitLab registry.
+gitlab-registry-usage is a utility for querying the memory usage of repositories in a GitLab registry.
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -51,8 +51,8 @@ file (`-c`) or username (`-u`) and password (read from stdin).
 
 ### API
 
-The module offers a high level `GitLabRegistry` class to query the image catalog and image sizes. This example prints
-all images, tags and their sizes:
+The module offers a high level `GitLabRegistry` class to query the repository catalog and repository sizes. This example
+prints all repositories, tags and their sizes:
 
 ```python
 from gitlab_registry_usage import GitLabRegistry
@@ -66,30 +66,30 @@ access_token = '0000000000'
 gitlab_registry = GitLabRegistry(
     gitlab_base_url, registry_base_url, username, access_token
 )
-for image in gitlab_registry.image_tags.keys():
-    image_tags = gitlab_registry.image_tags[image]
-    image_size = gitlab_registry.image_sizes[image]
-    image_disk_size = gitlab_registry.image_disk_sizes[image]
-    tag_sizes = gitlab_registry.tag_sizes[image]
-    tag_disk_sizes = gitlab_registry.tag_disk_sizes[image]
+for repository in gitlab_registry.repository_tags.keys():
+    repository_tags = gitlab_registry.repository_tags[repository]
+    repository_size = gitlab_registry.repository_sizes[repository]
+    repository_disk_size = gitlab_registry.repository_disk_sizes[repository]
+    tag_sizes = gitlab_registry.tag_sizes[repository]
+    tag_disk_sizes = gitlab_registry.tag_disk_sizes[repository]
     if (
-        image_tags is not None and image_size is not None
-        and image_disk_size is not None and tag_sizes is not None
+        repository_tags is not None and repository_size is not None
+        and repository_disk_size is not None and tag_sizes is not None
         and tag_disk_sizes is not None
     ):
         print(
-            '{}: image size: {}, image disk size: {}'.format(
-                image, image_size, image_disk_size
+            '{}: repository size: {}, repository disk size: {}'.format(
+                repository, repository_size, repository_disk_size
             )
         )
-        for tag in image_tags:
+        for tag in repository_tags:
             print(
                 '{}: tag size: {}, tag disk size: {}'.format(
                     tag, tag_sizes[tag], tag_disk_sizes[tag]
                 )
             )
     else:
-        print('{}: no further information available'.format(image))
+        print('{}: no further information available'.format(repository))
     print()
 print(
     ('total size: {}, total disk size: {}').format(
