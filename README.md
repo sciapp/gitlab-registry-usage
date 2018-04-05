@@ -97,3 +97,5 @@ print(
     )
 )
 ```
+
+The method `delete_image` can be used to delete a particular image if the corresponding SHA256 hash is known.

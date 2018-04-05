@@ -1,7 +1,7 @@
 from typing import cast, Dict, List, NamedTuple, Optional, Tuple  # noqa: F401  # pylint: disable=unused-import
 from .low_level_api import (  # noqa: F401  # pylint: disable=unused-import
     get_catalog_auth_token, get_registry_catalog, get_repository_auth_token, get_repository_tags, get_tag_layers,
-    get_layer_size, AuthTokenError, CatalogReadError, TagsReadError
+    get_layer_size, delete_image, AuthTokenError, CatalogReadError, TagsReadError
 )
 
 
@@ -182,3 +182,9 @@ class GitLabRegistry:
                 int, sum(value for value in self.repository_disk_sizes.values() if value is not None)
             )
         return self._total_disk_size
+
+    def delete_image(self, repository: str, image_hash: str) -> None:
+        repository_auth_token = get_repository_auth_token(
+            self._gitlab_url, self._admin_username, self._admin_auth_token, repository
+        )
+        delete_image(self._registry_url, repository_auth_token, repository, image_hash)

@@ -23,6 +23,10 @@ class LayerSizeReadError(Exception):
     pass
 
 
+class ImageDeleteError(Exception):
+    pass
+
+
 def _auth_token(auth_url: str, username: str, password: str) -> Optional[str]:
     response = requests.get(auth_url, auth=(username, password))
     if response.status_code != 200:
@@ -122,3 +126,12 @@ def get_layer_size(registry_url: str, auth_token: str, repository: str, layer: s
     except ValueError:
         raise LayerSizeReadError
     return content_length
+
+
+def delete_image(registry_url: str, auth_token: str, repository: str, image_hash: str) -> None:
+    image_url = '{base}v2/{repository}/manifests/{image_hash}'.format(
+        base=registry_url, repository=repository, image_hash=image_hash
+    )
+    response = requests.delete(image_url, headers={'Authorization': 'Bearer ' + auth_token})
+    if response.status_code != 202:
+        raise ImageDeleteError
