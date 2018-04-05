@@ -62,7 +62,7 @@ setup(
     },
     author='Ingo Heimbach',
     author_email='i.heimbach@fz-juelich.de',
-    description='This is a package for querying the size of images in a GitLab registry.',
+    description='This is a package for querying the size of repositories in a GitLab registry.',
     long_description=long_description,
     license='MIT',
     url='https://github.com/sciapp/gitlab-registry-usage',

@@ -72,8 +72,8 @@ def get_registry_catalog(registry_url: str, auth_token: str) -> List[str]:
     return [str(repository) for repository in response.json()['repositories']]
 
 
-def get_image_tags(registry_url: str, auth_token: str, image: str) -> List[str]:
-    repo_tags_url = '{base}v2/{image}/tags/list'.format(base=registry_url, image=image)
+def get_repository_tags(registry_url: str, auth_token: str, repository: str) -> List[str]:
+    repo_tags_url = '{base}v2/{repository}/tags/list'.format(base=registry_url, repository=repository)
     response = requests.get(repo_tags_url, headers={'Authorization': 'Bearer ' + auth_token})
     if response.status_code != 200:
         raise TagsReadError
@@ -88,8 +88,8 @@ def get_image_tags(registry_url: str, auth_token: str, image: str) -> List[str]:
     return [str(tag) for tag in response.json()['tags']]
 
 
-def get_tag_layers(registry_url: str, auth_token: str, image: str, tag: str) -> List[str]:
-    tag_layers_url = '{base}v2/{image}/manifests/{tag}'.format(base=registry_url, image=image, tag=tag)
+def get_tag_layers(registry_url: str, auth_token: str, repository: str, tag: str) -> List[str]:
+    tag_layers_url = '{base}v2/{repository}/manifests/{tag}'.format(base=registry_url, repository=repository, tag=tag)
     response = requests.get(tag_layers_url, headers={'Authorization': 'Bearer ' + auth_token})
     if response.status_code != 200:
         raise LayersReadError
@@ -109,8 +109,8 @@ def get_tag_layers(registry_url: str, auth_token: str, image: str, tag: str) -> 
     return fs_layers
 
 
-def get_layer_size(registry_url: str, auth_token: str, image: str, layer: str) -> int:
-    blob_url = '{base}v2/{image}/blobs/{layer}'.format(base=registry_url, image=image, layer=layer)
+def get_layer_size(registry_url: str, auth_token: str, repository: str, layer: str) -> int:
+    blob_url = '{base}v2/{repository}/blobs/{layer}'.format(base=registry_url, repository=repository, layer=layer)
     response = requests.head(blob_url, headers={'Authorization': 'Bearer ' + auth_token})
     if response.status_code != 200:
         raise LayerSizeReadError
