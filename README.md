@@ -55,7 +55,7 @@ The module offers a high level `GitLabRegistry` class to query the image catalog
 all images, tags and their sizes:
 
 ```python
-from gitlab_registry_usage.registry import GitLabRegistry
+from gitlab_registry_usage import GitLabRegistry
 
 # TODO: set these values!
 gitlab_base_url = ''
