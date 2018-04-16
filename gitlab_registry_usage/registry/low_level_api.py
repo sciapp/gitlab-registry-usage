@@ -116,6 +116,13 @@ def get_tag_layers(registry_url: str, auth_token: str, repository: str, tag: str
 def get_layer_size(registry_url: str, auth_token: str, repository: str, layer: str) -> int:
     blob_url = '{base}v2/{repository}/blobs/{layer}'.format(base=registry_url, repository=repository, layer=layer)
     response = requests.head(blob_url, headers={'Authorization': 'Bearer ' + auth_token})
+
+    # Handle redirect (S3 Backend for example)
+    if response.status_code == 307:
+        if 'Location' not in response.headers:
+            raise LayerSizeReadError
+        response = requests.head(response.headers['Location'])
+
     if response.status_code != 200:
         raise LayerSizeReadError
     response_header = response.headers
