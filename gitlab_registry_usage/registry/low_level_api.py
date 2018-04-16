@@ -61,7 +61,7 @@ def get_repository_auth_token(gitlab_url: str, username: str, password: str, rep
 
 
 def get_registry_catalog(registry_url: str, auth_token: str) -> List[str]:
-    catalog_url = '{base}v2/_catalog'.format(base=registry_url)
+    catalog_url = '{base}v2/_catalog?n={size}'.format(base=registry_url, size=16384)
     response = requests.get(catalog_url, headers={'Authorization': 'Bearer ' + auth_token})
     if response.status_code != 200:
         raise CatalogReadError
