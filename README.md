@@ -14,6 +14,13 @@ The latest version is available from PyPI:
 pip install gitlab-registry-usage
 ```
 
+If you use Arch Linux or one of its derivatives, you can also install `gitlab-registry-usage` from the
+[AUR](https://aur.archlinux.org/packages/python-gitlab-registry-usage/):
+
+```bash
+yay -S python-gitlab-registry-usage
+```
+
 ## Usage
 
 ### Command Line Interface
