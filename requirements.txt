@@ -1,3 +1,0 @@
-pyOpenSSL
-requests
-typing
