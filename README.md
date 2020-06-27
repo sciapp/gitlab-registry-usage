@@ -31,7 +31,7 @@ After installing with `pip`, a `gitlab-registry-usage` command is available:
 $ gitlab-registry-usage --help
 usage: gitlab-registry-usage [-h] [-g GITLAB_SERVER] [-r REGISTRY_SERVER]
                              [-s {name,size,disksize}] [-c CREDENTIALS_FILE]
-                             [-u USERNAME] [-V]
+                             [-u USERNAME] [-V] [-v | --debug]
 
 gitlab-registry-usage is a utility for querying the memory usage of repositories in a GitLab registry.
 
@@ -51,6 +51,8 @@ optional arguments:
                         user account for querying the GitLab API (default:
                         root)
   -V, --version         print the version number and exit
+  -v, --verbose         be verbose
+  --debug               print debug messages
 ```
 
 You should specify a GitLab server hostname (`-g`), a GitLab registry server hostname (`-r`) and either a credentials
