@@ -1,7 +1,16 @@
 from typing import cast, Dict, List, NamedTuple, Optional, Tuple  # noqa: F401  # pylint: disable=unused-import
 from .low_level_api import (  # noqa: F401  # pylint: disable=unused-import
-    get_catalog_auth_token, get_registry_catalog, get_repository_auth_token, get_repository_tags, get_tag_layers,
-    get_layer_size, delete_image, AuthTokenError, CatalogReadError, TagsReadError, LayersReadError
+    get_catalog_auth_token,
+    get_registry_catalog,
+    get_repository_auth_token,
+    get_repository_tags,
+    get_tag_layers,
+    get_layer_size,
+    delete_image,
+    AuthTokenError,
+    CatalogReadError,
+    TagsReadError,
+    LayersReadError,
 )
 
 
@@ -30,8 +39,9 @@ class GitLabRegistry:
         self.clear()
         self._repository_layers, self._layer_sizes = self._get_repository_layers_and_layer_sizes()
 
-    def _get_repository_layers_and_layer_sizes(self
-                                               ) -> Tuple[Dict[str, Optional[Dict[str, List[str]]]], Dict[str, int]]:
+    def _get_repository_layers_and_layer_sizes(
+        self,
+    ) -> Tuple[Dict[str, Optional[Dict[str, List[str]]]], Dict[str, int]]:
         repository_layers = {}  # type: Dict[str, Optional[Dict[str, List[str]]]]
         layer_sizes = {}  # type: Dict[str, int]
         for repository in self.registry_catalog:
@@ -53,7 +63,7 @@ class GitLabRegistry:
         return repository_layers, layer_sizes
 
     def _get_primary_repository_layers(self) -> Dict[str, Optional[Dict[str, List[str]]]]:
-        RepositoryWithTag = NamedTuple('RepositoryWithTag', [('repository', str), ('tag', str)])
+        RepositoryWithTag = NamedTuple("RepositoryWithTag", [("repository", str), ("tag", str)])
         layer_to_origin = {}  # type: Dict[str, RepositoryWithTag]
         for layer in self.layer_sizes:
             for repository, tag_layers in self.repository_layers.items():
@@ -73,7 +83,9 @@ class GitLabRegistry:
             repository: {
                 tag: [layer for layer in layers if layer_to_origin[layer] == RepositoryWithTag(repository, tag)]
                 for tag, layers in tag_layers.items()
-            } if tag_layers is not None else None
+            }
+            if tag_layers is not None
+            else None
             for repository, tag_layers in self.repository_layers.items()
         }  # type: Dict[str, Optional[Dict[str, List[str]]]]
         return primary_repository_layers
@@ -132,9 +144,11 @@ class GitLabRegistry:
     def tag_sizes(self) -> Dict[str, Optional[Dict[str, int]]]:
         if self._tag_sizes is None:
             self._tag_sizes = {
-                repository:
-                {tag: sum(self.layer_sizes[layer] for layer in layers)
-                 for tag, layers in tag_layers.items()} if tag_layers is not None else None
+                repository: {
+                    tag: sum(self.layer_sizes[layer] for layer in layers) for tag, layers in tag_layers.items()
+                }
+                if tag_layers is not None
+                else None
                 for repository, tag_layers in self.repository_layers.items()
             }
         return self._tag_sizes
@@ -146,7 +160,9 @@ class GitLabRegistry:
                 repository: {
                     tag: sum(self.layer_sizes[primary_layer] for primary_layer in primary_layers)
                     for tag, primary_layers in primary_tag_layers.items()
-                } if primary_tag_layers is not None else None
+                }
+                if primary_tag_layers is not None
+                else None
                 for repository, primary_tag_layers in self.primary_repository_layers.items()
             }
         return self._tag_disk_sizes
