@@ -1,3 +1,4 @@
+import logging
 from typing import cast, Dict, List, NamedTuple, Optional, Tuple  # noqa: F401  # pylint: disable=unused-import
 from .low_level_api import (  # noqa: F401  # pylint: disable=unused-import
     get_catalog_auth_token,
@@ -12,6 +13,9 @@ from .low_level_api import (  # noqa: F401  # pylint: disable=unused-import
     TagsReadError,
     LayersReadError,
 )
+
+
+logger = logging.getLogger(__name__)
 
 
 # pylint: disable=attribute-defined-outside-init
@@ -45,6 +49,7 @@ class GitLabRegistry:
         repository_layers = {}  # type: Dict[str, Optional[Dict[str, List[str]]]]
         layer_sizes = {}  # type: Dict[str, int]
         for repository in self.registry_catalog:
+            logger.info('Processing repository "%s"', repository)
             repository_auth_token = get_repository_auth_token(
                 self._gitlab_url, self._admin_username, self._admin_auth_token, repository
             )
@@ -52,11 +57,13 @@ class GitLabRegistry:
                 current_repository_layers = {}  # type: Dict[str, List[str]]
                 repository_tags = get_repository_tags(self._registry_url, repository_auth_token, repository)
                 for tag in repository_tags:
+                    logger.info('  Processing tag "%s"', tag)
                     tag_layers = get_tag_layers(self._registry_url, repository_auth_token, repository, tag)
                     current_repository_layers[tag] = tag_layers
                     for layer in tag_layers:
                         layer_size = get_layer_size(self._registry_url, repository_auth_token, repository, layer)
                         layer_sizes[layer] = layer_size
+                        logger.info('    Processing layer "%s", size "%d" bytes', layer, layer_size)
                 repository_layers[repository] = current_repository_layers
             except (TagsReadError, LayersReadError):
                 repository_layers[repository] = None

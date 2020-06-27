@@ -2,12 +2,14 @@
 
 import argparse
 import getpass
+import logging
 import math
 import os
 import re
 import subprocess
 import sys
 from typing import cast, Any, Callable
+from yacl import setup_colored_stderr_logging
 from .registry import GitLabRegistry, AuthTokenError
 from ._version import __version__, __version_info__  # noqa: F401 # pylint: disable=unused-import
 
@@ -18,6 +20,9 @@ __license__ = "MIT"
 
 DEFAULT_ORDER = "name"
 DEFAULT_USER = "root"
+
+
+logger = logging.getLogger(__name__)
 
 
 class MissingServerNameError(Exception):
@@ -122,6 +127,13 @@ def get_argumentparser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "-V", "--version", action="store_true", dest="print_version", help="print the version number and exit"
+    )
+    verbosity_group = parser.add_mutually_exclusive_group()
+    verbosity_group.add_argument(
+        "-v", "--verbose", action="store_true", dest="verbose", help="be verbose",
+    )
+    verbosity_group.add_argument(
+        "--debug", action="store_true", dest="debug", help="print debug messages",
     )
     return parser
 
@@ -276,22 +288,33 @@ def query_gitlab_registry(
     )
 
 
+def setup_stderr_logging(args: AttributeDict) -> None:
+    if args.verbose:
+        logging.basicConfig(level=logging.INFO)
+    elif args.debug:
+        logging.basicConfig(level=logging.DEBUG)
+    else:
+        logging.basicConfig(level=logging.WARNING)
+    setup_colored_stderr_logging(format_string="[%(levelname)s] %(message)s")
+
+
 def main() -> None:
     args = parse_arguments()
     if args.print_version:
         print("{}, version {}".format(os.path.basename(sys.argv[0]), __version__))
-    else:
-        try:
-            query_gitlab_registry(
-                args.gitlab_server, args.registry_server, args.username, args.password, args.sorting_order
-            )
-        except AuthTokenError:
-            print(
-                "{}Failed{} to get an auth token. Is the username/password correct?".format(
-                    TerminalColorCodes.RED, TerminalColorCodes.RESET
-                ),
-                file=sys.stderr,
-            )
+        sys.exit(0)
+    setup_stderr_logging(args)
+    try:
+        query_gitlab_registry(
+            args.gitlab_server, args.registry_server, args.username, args.password, args.sorting_order
+        )
+    except AuthTokenError:
+        print(
+            "{}Failed{} to get an auth token. Is the username/password correct?".format(
+                TerminalColorCodes.RED, TerminalColorCodes.RESET
+            ),
+            file=sys.stderr,
+        )
     sys.exit(0)
 
 

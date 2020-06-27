@@ -24,7 +24,7 @@ setup(
     version=version,
     packages=find_packages(),
     python_requires="~=3.3",
-    install_requires=["pyOpenSSL", "requests", "typing"],
+    install_requires=["pyOpenSSL", "requests", "typing", "yacl"],
     entry_points={"console_scripts": ["gitlab-registry-usage = gitlab_registry_usage.cli:main"]},
     author="Ingo Heimbach",
     author_email="i.heimbach@fz-juelich.de",
