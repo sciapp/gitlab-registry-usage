@@ -1,7 +1,7 @@
 from typing import cast, Dict, List, NamedTuple, Optional, Tuple  # noqa: F401  # pylint: disable=unused-import
 from .low_level_api import (  # noqa: F401  # pylint: disable=unused-import
     get_catalog_auth_token, get_registry_catalog, get_repository_auth_token, get_repository_tags, get_tag_layers,
-    get_layer_size, delete_image, AuthTokenError, CatalogReadError, TagsReadError
+    get_layer_size, delete_image, AuthTokenError, CatalogReadError, TagsReadError, LayersReadError
 )
 
 
@@ -48,7 +48,7 @@ class GitLabRegistry:
                         layer_size = get_layer_size(self._registry_url, repository_auth_token, repository, layer)
                         layer_sizes[layer] = layer_size
                 repository_layers[repository] = current_repository_layers
-            except TagsReadError:
+            except (TagsReadError, LayersReadError):
                 repository_layers[repository] = None
         return repository_layers, layer_sizes
 
