@@ -1,6 +1,6 @@
 import json
 import requests
-from typing import List, Optional
+from typing import List, Optional, Dict
 
 
 class AuthTokenError(Exception):
@@ -94,7 +94,7 @@ def get_repository_tags(registry_url: str, auth_token: str, repository: str) -> 
     return [str(tag) for tag in response.json()["tags"]]
 
 
-def get_tag_layers(registry_url: str, auth_token: str, repository: str, tag: str) -> List[str]:
+def get_tag_layers(registry_url: str, auth_token: str, repository: str, tag: str) -> Dict[str, Optional[int]]:
     tag_layers_url = "{base}v2/{repository}/manifests/{tag}".format(base=registry_url, repository=repository, tag=tag)
     response = requests.get(tag_layers_url, headers={"Authorization": "Bearer " + auth_token})
     if response.status_code != 200:
@@ -103,15 +103,25 @@ def get_tag_layers(registry_url: str, auth_token: str, repository: str, tag: str
         json_response = response.json()
     except json.decoder.JSONDecodeError:
         raise LayersReadError
-    if "fsLayers" not in json_response:
+    if "fsLayers" in json_response:
+        layer_key = "fsLayers"
+    elif "layers" in json_response:
+        layer_key = "layers"
+    else:
         raise LayersReadError
-    fs_layers = []  # type: List[str]
-    if json_response["fsLayers"] is None:
+    fs_layers = {}  # type: Dict[str, Optional[int]]
+    if json_response[layer_key] is None:
         return fs_layers
-    for layer in json_response["fsLayers"]:
-        if "blobSum" not in layer:
+    for layer in json_response[layer_key]:
+        if "size" in layer and "digest" in layer:
+            try:
+                fs_layers[str(layer["digest"])] = int(layer["size"])
+            except ValueError:
+                raise LayerSizeReadError
+        elif "blobSum" in layer:
+            fs_layers[str(layer["blobSum"])] = None
+        else:
             raise LayersReadError
-        fs_layers.append(str(layer["blobSum"]))
     return fs_layers
 
 

@@ -59,9 +59,10 @@ class GitLabRegistry:
                 for tag in repository_tags:
                     logger.info('  Processing tag "%s"', tag)
                     tag_layers = get_tag_layers(self._registry_url, repository_auth_token, repository, tag)
-                    current_repository_layers[tag] = tag_layers
-                    for layer in tag_layers:
-                        layer_size = get_layer_size(self._registry_url, repository_auth_token, repository, layer)
+                    current_repository_layers[tag] = list(tag_layers.keys())
+                    for layer, layer_size in tag_layers.items():
+                        if not layer_size:
+                            layer_size = get_layer_size(self._registry_url, repository_auth_token, repository, layer)
                         layer_sizes[layer] = layer_size
                         logger.info('    Processing layer "%s", size "%d" bytes', layer, layer_size)
                 repository_layers[repository] = current_repository_layers
