@@ -96,7 +96,10 @@ def get_repository_tags(registry_url: str, auth_token: str, repository: str) -> 
 
 def get_tag_layers(registry_url: str, auth_token: str, repository: str, tag: str) -> Dict[str, Optional[int]]:
     tag_layers_url = "{base}v2/{repository}/manifests/{tag}".format(base=registry_url, repository=repository, tag=tag)
-    response = requests.get(tag_layers_url, headers={"Authorization": "Bearer " + auth_token})
+    response = requests.get(tag_layers_url, headers={
+        "Authorization": "Bearer " + auth_token,
+        "Accept": "application/vnd.oci.image.manifest.v2+json, application/vnd.oci.image.manifest.v1+json"
+    })
     if response.status_code != 200:
         raise LayersReadError
     try:
