@@ -21,6 +21,13 @@ If you use Arch Linux or one of its derivatives, you can also install `gitlab-re
 yay -S python-gitlab-registry-usage
 ```
 
+Optionally, you can also use Docker:
+
+```bash
+docker build -t gitlab-registry-usage .
+docker run --rm -it gitlab-registry-usage --help
+```
+
 ## Usage
 
 ### Command Line Interface
